@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Design documentation &mdash; Kernel Tuner 0.4.1 documentation</title>
+  <title>Design documentation &mdash; Kernel Tuner 0.4.2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             <a href="index.html" class="icon icon-home"> Kernel Tuner
           </a>
               <div class="version">
-                0.4.1
+                0.4.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -57,13 +57,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#strategies">Strategies</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.brute_force">kernel_tuner.strategies.brute_force</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.random_sample">kernel_tuner.strategies.random_sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.bayes_opt">kernel_tuner.strategies.bayes_opt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.minimize">kernel_tuner.strategies.minimize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.basinhopping">kernel_tuner.strategies.basinhopping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.diff_evo">kernel_tuner.strategies.diff_evo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kernel-tuner-strategies-dual-annealing">kernel_tuner.strategies.dual_annealing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.genetic_algorithm">kernel_tuner.strategies.genetic_algorithm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.pso">kernel_tuner.strategies.pso</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.firefly_algorithm">kernel_tuner.strategies.firefly_algorithm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.simulated_annealing">kernel_tuner.strategies.simulated_annealing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.mls">kernel_tuner.strategies.mls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.greedy_mls">kernel_tuner.strategies.greedy_mls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.ordered_greedy_mls">kernel_tuner.strategies.ordered_greedy_mls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-kernel_tuner.strategies.greedy_ils">kernel_tuner.strategies.greedy_ils</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#runners">Runners</a><ul>
@@ -152,10 +158,10 @@ which uses any of the main functions exposed in the user interface.</p>
 the search space. The default strategy is <code class="docutils literal notranslate"><span class="pre">brute_force</span></code>, which
 iterates over all valid kernel configurations in the search space.
 <code class="docutils literal notranslate"><span class="pre">random_sample</span></code> simply takes a random sample of the search space. More
-advanced strategies currently implemented in Kernel Tuner are
-<code class="docutils literal notranslate"><span class="pre">minimize</span></code>, <code class="docutils literal notranslate"><span class="pre">basinhopping</span></code>, and differential evolution
-(<code class="docutils literal notranslate"><span class="pre">diff_evo</span></code>). How to use these is explained in the <a class="reference internal" href="user-api.html"><span class="doc">API Documentation</span></a>,
-see the options <code class="docutils literal notranslate"><span class="pre">strategy</span></code> and <code class="docutils literal notranslate"><span class="pre">strategy_options</span></code>.</p>
+advanced strategies are continuously being implemented and improved in
+Kernel Tuner. The full list of supported strategies and how to use these
+is explained in the <a class="reference internal" href="user-api.html"><span class="doc">API Documentation</span></a>, see the options <code class="docutils literal notranslate"><span class="pre">strategy</span></code> and
+<code class="docutils literal notranslate"><span class="pre">strategy_options</span></code>.</p>
 <p>The runners are responsible for compiling and benchmarking the kernel
 configurations selected by the strategy. The sequential runner is currently
 the only supported runner, which does exactly what its name says. It compiles
@@ -206,7 +212,7 @@ process.</p></li>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
-execution times. And a dictionary that contains a information
+execution times. And a dictionary that contains information
 about the hardware/software environment on which the tuning took place.</p>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -238,6 +244,56 @@ process.</p></li>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
+execution times. And a dictionary that contains information
+about the hardware/software environment on which the tuning took place.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list(dict()), dict()</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-kernel_tuner.strategies.bayes_opt">
+<span id="kernel-tuner-strategies-bayes-opt"></span><h3>kernel_tuner.strategies.bayes_opt<a class="headerlink" href="#module-kernel_tuner.strategies.bayes_opt" title="Permalink to this headline">¶</a></h3>
+<p>Bayesian Optimization implementation from the thesis by Willemsen</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.bayes_opt.generate_normalized_param_dicts">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.bayes_opt.</span></span><span class="sig-name descname"><span class="pre">generate_normalized_param_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tune_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#kernel_tuner.strategies.bayes_opt.generate_normalized_param_dicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates normalization and denormalization dictionaries</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.bayes_opt.normalize_parameter_space">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.bayes_opt.</span></span><span class="sig-name descname"><span class="pre">normalize_parameter_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#kernel_tuner.strategies.bayes_opt.normalize_parameter_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize the parameter space given a normalization dictionary</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.bayes_opt.prune_parameter_space">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.bayes_opt.</span></span><span class="sig-name descname"><span class="pre">prune_parameter_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.bayes_opt.prune_parameter_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pruning of the parameter space to remove dimensions that have a constant parameter</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.bayes_opt.tune">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.bayes_opt.</span></span><span class="sig-name descname"><span class="pre">tune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.bayes_opt.tune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the best performing kernel configuration in the parameter space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params runner</dt>
+<dd class="field-odd"><p>A runner from kernel_tuner.runners</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>kernel_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the kernel.</p></li>
+<li><p><strong>device_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the device
+on which the kernel should be tuned.</p></li>
+<li><p><strong>tuning_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options regarding the tuning
+process. Allows setting hyperparameters via the strategy_options key.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
 execution times. And a dictionary that contains a information
 about the hardware/software environment on which the tuning took place.</p>
 </dd>
@@ -259,8 +315,14 @@ about the hardware/software environment on which the tuning took place.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.strategies.minimize.get_bounds_x0_eps">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.minimize.</span></span><span class="sig-name descname"><span class="pre">get_bounds_x0_eps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.minimize.get_bounds_x0_eps" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.minimize.</span></span><span class="sig-name descname"><span class="pre">get_bounds_x0_eps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.minimize.get_bounds_x0_eps" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute bounds, x0 (the initial guess), and eps</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.minimize.scale_from_params">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.minimize.</span></span><span class="sig-name descname"><span class="pre">scale_from_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.minimize.scale_from_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper func to do the inverse of the ‘unscale’ function</p>
 </dd></dl>
 
 <dl class="py function">
@@ -300,7 +362,7 @@ process.</p></li>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
-execution times. And a dictionary that contains a information
+execution times. And a dictionary that contains information
 about the hardware/software environment on which the tuning took place.</p>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -380,6 +442,38 @@ about the hardware/software environment on which the tuning took place.</p>
 </dd></dl>
 
 </section>
+<section id="kernel-tuner-strategies-dual-annealing">
+<h3>kernel_tuner.strategies.dual_annealing<a class="headerlink" href="#kernel-tuner-strategies-dual-annealing" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-kernel_tuner.strategies.dual_annealing"></span><p>The strategy that uses the dual annealing optimization method</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.dual_annealing.tune">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.dual_annealing.</span></span><span class="sig-name descname"><span class="pre">tune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.dual_annealing.tune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the best performing kernel configuration in the parameter space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params runner</dt>
+<dd class="field-odd"><p>A runner from kernel_tuner.runners</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>kernel_options</strong> (<em>dict</em>) – A dictionary with all options for the kernel.</p></li>
+<li><p><strong>device_options</strong> (<em>dict</em>) – A dictionary with all options for the device
+on which the kernel should be tuned.</p></li>
+<li><p><strong>tuning_options</strong> (<em>dict</em>) – A dictionary with all options regarding the tuning
+process.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
+execution times. And a dictionary that contains a information
+about the hardware/software environment on which the tuning took place.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list(dict()), dict()</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-kernel_tuner.strategies.genetic_algorithm">
 <span id="kernel-tuner-strategies-genetic-algorithm"></span><h3>kernel_tuner.strategies.genetic_algorithm<a class="headerlink" href="#module-kernel_tuner.strategies.genetic_algorithm" title="Permalink to this headline">¶</a></h3>
 <p>A simple genetic algorithm for parameter search</p>
@@ -394,20 +488,8 @@ if the number of differences between parents is larger than 1</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.strategies.genetic_algorithm.mutate">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.genetic_algorithm.</span></span><span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_chance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.genetic_algorithm.mutate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.genetic_algorithm.</span></span><span class="sig-name descname"><span class="pre">mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dna</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutation_chance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">searchspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kernel_tuner.searchspace.Searchspace</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.genetic_algorithm.mutate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutate DNA with 1/mutation_chance chance</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kernel_tuner.strategies.genetic_algorithm.random_population">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.genetic_algorithm.</span></span><span class="sig-name descname"><span class="pre">random_population</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pop_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.genetic_algorithm.random_population" title="Permalink to this definition">¶</a></dt>
-<dd><p>create a random population of pop_size unique members</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="kernel_tuner.strategies.genetic_algorithm.random_val">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.genetic_algorithm.</span></span><span class="sig-name descname"><span class="pre">random_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.genetic_algorithm.random_val" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a random value for a parameter</p>
 </dd></dl>
 
 <dl class="py function">
@@ -435,7 +517,7 @@ process.</p></li>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
-execution times. And a dictionary that contains a information
+execution times. And a dictionary that contains information
 about the hardware/software environment on which the tuning took place.</p>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -556,13 +638,13 @@ about the hardware/software environment on which the tuning took place.</p>
 <p>The strategy that uses particle swarm optimization</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.strategies.simulated_annealing.acceptance_prob">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.simulated_annealing.</span></span><span class="sig-name descname"><span class="pre">acceptance_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.simulated_annealing.acceptance_prob" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.simulated_annealing.</span></span><span class="sig-name descname"><span class="pre">acceptance_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_cost</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.simulated_annealing.acceptance_prob" title="Permalink to this definition">¶</a></dt>
 <dd><p>annealing equation, with modifications to work towards a lower value</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.strategies.simulated_annealing.neighbor">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.simulated_annealing.</span></span><span class="sig-name descname"><span class="pre">neighbor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tune_params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.simulated_annealing.neighbor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.simulated_annealing.</span></span><span class="sig-name descname"><span class="pre">neighbor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">searchspace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">kernel_tuner.searchspace.Searchspace</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.simulated_annealing.neighbor" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a random neighbor of pos</p>
 </dd></dl>
 
@@ -585,7 +667,135 @@ process.</p></li>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
-execution times. And a dictionary that contains a information
+execution times. And a dictionary that contains information
+about the hardware/software environment on which the tuning took place.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list(dict()), dict()</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-kernel_tuner.strategies.mls">
+<span id="kernel-tuner-strategies-mls"></span><h3>kernel_tuner.strategies.mls<a class="headerlink" href="#module-kernel_tuner.strategies.mls" title="Permalink to this headline">¶</a></h3>
+<p>The strategy that uses multi-start local search</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.mls.tune">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.mls.</span></span><span class="sig-name descname"><span class="pre">tune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.mls.tune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the best performing kernel configuration in the parameter space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params runner</dt>
+<dd class="field-odd"><p>A runner from kernel_tuner.runners</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>kernel_options</strong> (<em>dict</em>) – A dictionary with all options for the kernel.</p></li>
+<li><p><strong>device_options</strong> (<em>dict</em>) – A dictionary with all options for the device
+on which the kernel should be tuned.</p></li>
+<li><p><strong>tuning_options</strong> (<em>dict</em>) – A dictionary with all options regarding the tuning
+process.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
+execution times. And a dictionary that contains information
+about the hardware/software environment on which the tuning took place.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list(dict()), dict()</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-kernel_tuner.strategies.greedy_mls">
+<span id="kernel-tuner-strategies-greedy-mls"></span><h3>kernel_tuner.strategies.greedy_mls<a class="headerlink" href="#module-kernel_tuner.strategies.greedy_mls" title="Permalink to this headline">¶</a></h3>
+<p>A greedy multi-start local search algorithm for parameter search</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.greedy_mls.tune">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.greedy_mls.</span></span><span class="sig-name descname"><span class="pre">tune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.greedy_mls.tune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the best performing kernel configuration in the parameter space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params runner</dt>
+<dd class="field-odd"><p>A runner from kernel_tuner.runners</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>kernel_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the kernel.</p></li>
+<li><p><strong>device_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the device
+on which the kernel should be tuned.</p></li>
+<li><p><strong>tuning_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options regarding the tuning
+process.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
+execution times. And a dictionary that contains information
+about the hardware/software environment on which the tuning took place.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list(dict()), dict()</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-kernel_tuner.strategies.ordered_greedy_mls">
+<span id="kernel-tuner-strategies-ordered-greedy-mls"></span><h3>kernel_tuner.strategies.ordered_greedy_mls<a class="headerlink" href="#module-kernel_tuner.strategies.ordered_greedy_mls" title="Permalink to this headline">¶</a></h3>
+<p>A greedy multi-start local search algorithm for parameter search that traverses variables in order.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.ordered_greedy_mls.tune">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.ordered_greedy_mls.</span></span><span class="sig-name descname"><span class="pre">tune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.ordered_greedy_mls.tune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the best performing kernel configuration in the parameter space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params runner</dt>
+<dd class="field-odd"><p>A runner from kernel_tuner.runners</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>kernel_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the kernel.</p></li>
+<li><p><strong>device_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the device
+on which the kernel should be tuned.</p></li>
+<li><p><strong>tuning_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options regarding the tuning
+process.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
+execution times. And a dictionary that contains information
+about the hardware/software environment on which the tuning took place.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list(dict()), dict()</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-kernel_tuner.strategies.greedy_ils">
+<span id="kernel-tuner-strategies-greedy-ils"></span><h3>kernel_tuner.strategies.greedy_ils<a class="headerlink" href="#module-kernel_tuner.strategies.greedy_ils" title="Permalink to this headline">¶</a></h3>
+<p>A simple greedy iterative local search algorithm for parameter search</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.strategies.greedy_ils.tune">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.strategies.greedy_ils.</span></span><span class="sig-name descname"><span class="pre">tune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.strategies.greedy_ils.tune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the best performing kernel configuration in the parameter space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params runner</dt>
+<dd class="field-odd"><p>A runner from kernel_tuner.runners</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>kernel_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the kernel.</p></li>
+<li><p><strong>device_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options for the device
+on which the kernel should be tuned.</p></li>
+<li><p><strong>tuning_options</strong> (<em>kernel_tuner.interface.Options</em>) – A dictionary with all options regarding the tuning
+process.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of dictionaries for executed kernel configurations and their
+execution times. And a dictionary that contains information
 about the hardware/software environment on which the tuning took place.</p>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -1531,10 +1741,68 @@ interface as CudaFunctions and OpenCLFunctions.</p></li>
 <section id="module-kernel_tuner.util">
 <span id="kernel-tuner-util"></span><h3>kernel_tuner.util<a class="headerlink" href="#module-kernel_tuner.util" title="Permalink to this headline">¶</a></h3>
 <p>Module for kernel tuner utility functions</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="kernel_tuner.util.CompilationFailedConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">CompilationFailedConfig</span></span><a class="headerlink" href="#kernel_tuner.util.CompilationFailedConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kernel_tuner.util.ErrorConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">ErrorConfig</span></span><a class="headerlink" href="#kernel_tuner.util.ErrorConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kernel_tuner.util.InvalidConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">InvalidConfig</span></span><a class="headerlink" href="#kernel_tuner.util.InvalidConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kernel_tuner.util.MaxProdConstraint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">MaxProdConstraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxprod</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.MaxProdConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constraint enforcing that values of given variables create a product up to a given amount</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kernel_tuner.util.MaxProdConstraint.preProcess">
+<span class="sig-name descname"><span class="pre">preProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vconstraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.MaxProdConstraint.preProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Preprocess variable domains</p>
+<p>This method is called before starting to look for solutions,
+and is used to prune domains with specific constraint logic
+when possible. For instance, any constraints with a single
+variable may be applied on all possible values and removed,
+since they may act on individual values even without further
+knowledge about other assignments.</p>
+<dl class="simple">
+<dt>&#64;param variables: Variables affected by that constraint, in the</dt><dd><p>same order provided by the user</p>
+</dd>
+</dl>
+<p>&#64;type  variables: sequence
+&#64;param domains: Dictionary mapping variables to their domains
+&#64;type  domains: dict
+&#64;param constraints: List of pairs of (constraint, variables)
+&#64;type  constraints: list
+&#64;param vconstraints: Dictionary mapping variables to a list of</p>
+<blockquote>
+<div><p>constraints affecting the given variables.</p>
+</div></blockquote>
+<p>&#64;type  vconstraints: dict</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="kernel_tuner.util.RuntimeFailedConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">RuntimeFailedConfig</span></span><a class="headerlink" href="#kernel_tuner.util.RuntimeFailedConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py exception">
 <dt class="sig sig-object py" id="kernel_tuner.util.SkippableFailure">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">SkippableFailure</span></span><a class="headerlink" href="#kernel_tuner.util.SkippableFailure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exception used to raise when compiling or launching a kernel fails for a reason that can be expected</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="kernel_tuner.util.StopCriterionReached">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">StopCriterionReached</span></span><a class="headerlink" href="#kernel_tuner.util.StopCriterionReached" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception thrown when a stop criterion has been reached</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1551,8 +1819,20 @@ interface as CudaFunctions and OpenCLFunctions.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.util.check_restrictions">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">check_restrictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restrictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.check_restrictions" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">check_restrictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restrictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.check_restrictions" title="Permalink to this definition">¶</a></dt>
 <dd><p>check whether a specific instance meets the search space restrictions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.check_stop_criterion">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">check_stop_criterion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.check_stop_criterion" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks if max_fevals is reached or time limit is exceeded</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.check_thread_block_dimensions">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">check_thread_block_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.check_thread_block_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>check on maximum thread block dimensions</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1565,6 +1845,12 @@ interface as CudaFunctions and OpenCLFunctions.</p></li>
 <dt class="sig sig-object py" id="kernel_tuner.util.config_valid">
 <span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">config_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.config_valid" title="Permalink to this definition">¶</a></dt>
 <dd><p>combines restrictions and a check on the max thread block dimension to check config validity</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.convert_constraint_restriction">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">convert_constraint_restriction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restrict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">constraint.Constraint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.convert_constraint_restriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the python-constraint to a function for backwards compatibility</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1583,6 +1869,12 @@ interface as CudaFunctions and OpenCLFunctions.</p></li>
 <dt class="sig sig-object py" id="kernel_tuner.util.dump_cache">
 <span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">dump_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.dump_cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>dumps a string in the cache, this omits the several checks of store_cache() to speed up the process - with great power comes great responsibility!</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.get_best_config">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">get_best_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective_higher_is_better</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.get_best_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the best configuration from a list of results according to some objective</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1635,12 +1927,6 @@ kernel instance, only needed when kernel_source is a generator.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="kernel_tuner.util.get_number_of_valid_configs">
-<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">get_number_of_valid_configs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_threads</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.get_number_of_valid_configs" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute number of valid configurations in a search space based on restrictions and max_threads</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.util.get_problem_size">
 <span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">get_problem_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.get_problem_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute current problem size</p>
@@ -1665,6 +1951,12 @@ kernel instance, only needed when kernel_source is a generator.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.get_total_timings">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">get_total_timings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overhead_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.get_total_timings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum all timings and put their totals in the env</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="kernel_tuner.util.looks_like_a_filename">
 <span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">looks_like_a_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel_source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.looks_like_a_filename" title="Permalink to this definition">¶</a></dt>
 <dd><p>attempt to detect whether source code or a filename was passed</p>
@@ -1678,6 +1970,12 @@ kernel instance, only needed when kernel_source is a generator.</p></li>
 and an optional keyword (or keyword-only) argument atol. We normalize it to always accept
 an atol keyword argument.</p>
 <p>Undefined behaviour if the passed function does not match the required signatures.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.parse_restrictions">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">parse_restrictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restrictions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.parse_restrictions" title="Permalink to this definition">¶</a></dt>
+<dd><p>” parses restrictions from a list of strings into a callable function</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1713,6 +2011,12 @@ may supply different names if they prefer.</p></li>
 <dd class="field-odd"><p>string</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kernel_tuner.util.print_config">
+<span class="sig-prename descclassname"><span class="pre">kernel_tuner.util.</span></span><span class="sig-name descname"><span class="pre">print_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuning_options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runner</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kernel_tuner.util.print_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>print the configuration string with tunable parameters and benchmark results</p>
 </dd></dl>
 
 <dl class="py function">
